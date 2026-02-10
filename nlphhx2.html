@@ -5,196 +5,198 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NLP: Deep Dive for Beginners</title>
     <style>
-        /* --- CSS VARIABLES & RESET --- */
-        :root {
-            --primary: #6366f1;       /* Indigo */
-            --primary-dark: #4338ca;
-            --secondary: #10b981;     /* Emerald */
-            --accent: #f59e0b;        /* Amber */
-            --danger: #ef4444;        /* Red */
-            --dark: #1e293b;          /* Slate 800 */
-            --darker: #0f172a;        /* Slate 900 */
-            --text: #334155;          /* Slate 700 */
-            --light: #f8fafc;         /* Slate 50 */
-            --white: #ffffff;
-            --code-bg: #1e1e1e;
-            --radius: 12px;
-            --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            --font-mono: 'Consolas', 'Monaco', monospace;
-        }
+    /* --- CSS VARIABLES & RESET --- */
+    :root {
+        --primary: #6366f1;       /* Indigo */
+        --primary-dark: #4338ca;
+        --secondary: #10b981;     /* Emerald */
+        --accent: #f59e0b;        /* Amber */
+        --danger: #ef4444;        /* Red */
+        --dark: #1e293b;          /* Slate 800 */
+        --darker: #0f172a;        /* Slate 900 */
+        --text: #334155;          /* Slate 700 */
+        --light: #f8fafc;         /* Slate 50 */
+        --white: #ffffff;
+        --code-bg: #1e1e1e;
+        --radius: 12px;
+        --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        --font-mono: 'Consolas', 'Monaco', monospace;
+    }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            font-family: var(--font-main);
-            color: var(--text);
-            background-color: var(--light);
-            line-height: 1.6;
-        }
+    body {
+        font-family: var(--font-main);
+        color: var(--text);
+        background-color: var(--light);
+        line-height: 1.5; /* Reduced from 1.6 */
+    }
 
-        /* --- TYPOGRAPHY --- */
-        h1, h2, h3 { color: var(--dark); font-weight: 800; line-height: 1.2; }
-        h1 { font-size: 3rem; margin-bottom: 1rem; letter-spacing: -1px; }
-        h2 { font-size: 2.2rem; margin-bottom: 2rem; text-align: center; }
-        h3 { font-size: 1.4rem; margin-bottom: 0.5rem; }
-        p { margin-bottom: 1rem; font-size: 1.1rem; }
-        
-        .highlight { color: var(--primary); font-weight: 700; }
-        .mono { font-family: var(--font-mono); color: var(--primary-dark); background: #e0e7ff; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+    /* --- TYPOGRAPHY --- */
+    h1, h2, h3 { color: var(--dark); font-weight: 800; line-height: 1.2; }
+    h1 { font-size: 2.5rem; margin-bottom: 0.5rem; letter-spacing: -1px; } /* Smaller H1 */
+    h2 { font-size: 1.8rem; margin-bottom: 1.5rem; text-align: center; } /* Smaller H2 */
+    h3 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+    p { margin-bottom: 0.8rem; font-size: 1rem; }
+    
+    .highlight { color: var(--primary); font-weight: 700; }
+    .mono { font-family: var(--font-mono); color: var(--primary-dark); background: #e0e7ff; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
 
-        /* --- LAYOUT --- */
-        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
-        section { padding: 5rem 0; border-bottom: 1px solid #e2e8f0; }
+    /* --- LAYOUT --- */
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+    
+    /* !!! CHANGED: Reduced padding from 5rem to 2.5rem !!! */
+    section { padding: 2.5rem 0; border-bottom: 1px solid #e2e8f0; }
 
-        /* --- COMPONENT: HERO --- */
-        .hero {
-            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
-            color: var(--white);
-            padding: 8rem 0;
-            text-align: center;
-        }
-        .hero h1 { color: var(--white); }
-        .hero p { color: #94a3b8; font-size: 1.3rem; max-width: 700px; margin: 0 auto; }
+    /* --- COMPONENT: HERO --- */
+    .hero {
+        background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+        color: var(--white);
+        /* !!! CHANGED: Reduced padding from 8rem to 4rem !!! */
+        padding: 4rem 0;
+        text-align: center;
+    }
+    .hero h1 { color: var(--white); }
+    .hero p { color: #94a3b8; font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
 
-        /* --- COMPONENT: PIPELINE (THE FLOW) --- */
-        .pipeline-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin: 3rem 0;
-        }
+    /* --- COMPONENT: PIPELINE --- */
+    .pipeline-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.8rem; /* Tighter gap */
+        margin: 1.5rem 0; /* Reduced from 3rem */
+    }
 
-        .pipe-step {
-            background: var(--white);
-            padding: 1.5rem;
-            border-radius: var(--radius);
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            text-align: center;
-            flex: 1;
-            min-width: 180px;
-            border-top: 5px solid var(--primary);
-            position: relative;
-        }
+    .pipe-step {
+        background: var(--white);
+        padding: 1rem; /* Reduced padding inside boxes */
+        border-radius: var(--radius);
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        text-align: center;
+        flex: 1;
+        min-width: 150px;
+        border-top: 4px solid var(--primary);
+        position: relative;
+    }
 
-        .pipe-step::after {
-            content: "➜";
-            position: absolute;
-            right: -20px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.5rem;
-            color: var(--text);
-            opacity: 0.5;
-        }
+    .pipe-step h3 { font-size: 1.1rem; }
+    .pipe-step p { font-size: 0.9rem; margin-bottom: 0; }
 
-        .pipe-step:last-child::after { content: none; }
+    .pipe-step::after {
+        content: "➜";
+        position: absolute;
+        right: -15px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.2rem;
+        color: var(--text);
+        opacity: 0.4;
+    }
 
-        @media (max-width: 768px) {
-            .pipe-step::after { content: "⬇"; right: 50%; top: auto; bottom: -30px; transform: translateX(50%); }
-            .pipeline-container { flex-direction: column; gap: 2rem; }
-        }
+    .pipe-step:last-child::after { content: none; }
 
-        /* --- COMPONENT: CONCEPT CARDS (DEEP DIVE) --- */
-        .concept-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
+    @media (max-width: 768px) {
+        .pipe-step::after { content: "⬇"; right: 50%; top: auto; bottom: -25px; transform: translateX(50%); }
+        .pipeline-container { flex-direction: column; gap: 1.5rem; }
+    }
 
-        .concept-card {
-            background: var(--white);
-            border-radius: var(--radius);
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-            border: 1px solid #e2e8f0;
-        }
+    /* --- COMPONENT: CONCEPT CARDS --- */
+    .concept-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem; /* Reduced gap */
+    }
 
-        .concept-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+    .concept-card {
+        background: var(--white);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        border: 1px solid #e2e8f0;
+    }
 
-        .concept-header {
-            background: var(--primary);
-            color: var(--white);
-            padding: 1rem 1.5rem;
-            font-weight: 700;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .concept-header {
+        background: var(--primary);
+        color: var(--white);
+        padding: 0.8rem 1.2rem; /* Reduced padding */
+        font-weight: 700;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1rem;
+    }
 
-        .concept-body { padding: 1.5rem; }
+    .concept-body { padding: 1.2rem; }
 
-        .visual-example {
-            background: #f1f5f9;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-            font-family: var(--font-mono);
-            font-size: 0.9rem;
-            border-left: 4px solid var(--accent);
-        }
+    .visual-example {
+        background: #f1f5f9;
+        padding: 0.8rem;
+        border-radius: 8px;
+        margin-top: 0.8rem;
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        border-left: 4px solid var(--accent);
+    }
 
-        /* --- COMPONENT: INTERACTIVE PLAYGROUND --- */
-        .playground {
-            background: var(--dark);
-            color: var(--white);
-            padding: 2rem;
-            border-radius: var(--radius);
-            margin-top: 2rem;
-        }
+    /* --- COMPONENT: PLAYGROUND --- */
+    .playground {
+        background: var(--dark);
+        color: var(--white);
+        padding: 1.5rem;
+        border-radius: var(--radius);
+        margin-top: 1.5rem;
+    }
 
-        .input-group { margin-bottom: 1.5rem; }
-        
-        input[type="text"] {
-            width: 100%;
-            padding: 1rem;
-            border-radius: 8px;
-            border: none;
-            font-family: var(--font-mono);
-            font-size: 1.1rem;
-        }
+    .input-group { margin-bottom: 1rem; }
+    
+    input[type="text"] {
+        width: 100%;
+        padding: 0.8rem;
+        border-radius: 8px;
+        border: none;
+        font-family: var(--font-mono);
+        font-size: 1rem;
+    }
 
-        .btn-action {
-            background: var(--secondary);
-            color: var(--darker);
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 6px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: opacity 0.2s;
-        }
-        
-        .btn-action:hover { opacity: 0.9; }
+    .btn-action {
+        background: var(--secondary);
+        color: var(--darker);
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 6px;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 0.95rem;
+    }
+    
+    .output-area {
+        background: var(--code-bg);
+        padding: 0.8rem;
+        border-radius: 8px;
+        min-height: 40px;
+        font-family: var(--font-mono);
+        color: #a5f3fc;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+    }
 
-        .output-area {
-            background: var(--code-bg);
-            padding: 1rem;
-            border-radius: 8px;
-            min-height: 60px;
-            font-family: var(--font-mono);
-            color: #a5f3fc; /* Cyan text */
-            margin-top: 1rem;
-        }
+    /* --- COMPONENT: MATH BOX --- */
+    .math-box {
+        background: #fffbeb;
+        border: 2px solid #fcd34d;
+        padding: 1.5rem;
+        border-radius: var(--radius);
+        margin: 1.5rem 0;
+    }
 
-        /* --- COMPONENT: MATH EXPLAINER --- */
-        .math-box {
-            background: #fffbeb; /* Amber light */
-            border: 2px solid #fcd34d;
-            padding: 2rem;
-            border-radius: var(--radius);
-            margin: 2rem 0;
-        }
-
-        .vector-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-        }
-    </style>
+    .vector-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+</style>
 </head>
 <body>
 
@@ -392,4 +394,5 @@
         }
     </script>
 </body>
+
 </html>
