@@ -3,393 +3,462 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NLP: Deep Dive for Beginners</title>
+    <title>NLP Workshop: Build It Yourself</title>
     <style>
-        /* --- CSS VARIABLES & RESET --- */
+        /* --- CSS VARIABLES & THEME --- */
         :root {
-            --primary: #6366f1;       /* Indigo */
-            --primary-dark: #4338ca;
-            --secondary: #10b981;     /* Emerald */
-            --accent: #f59e0b;        /* Amber */
-            --danger: #ef4444;        /* Red */
-            --dark: #1e293b;          /* Slate 800 */
-            --darker: #0f172a;        /* Slate 900 */
-            --text: #334155;          /* Slate 700 */
-            --light: #f8fafc;         /* Slate 50 */
-            --white: #ffffff;
-            --code-bg: #1e1e1e;
-            --radius: 12px;
-            --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            --font-mono: 'Consolas', 'Monaco', monospace;
+            --bg: #0f172a;        /* Deep Blue/Black */
+            --panel: #1e293b;     /* Dark Gray */
+            --border: #334155;    /* Light Border */
+            --text: #e2e8f0;      /* White-ish */
+            --accent: #38bdf8;    /* Cyan */
+            --success: #4ade80;   /* Green */
+            --keyword: #c678dd;   /* Purple (Code) */
+            --string: #98c379;    /* Green (Code) */
+            --comment: #5c6370;   /* Gray (Code) */
+            --func: #61afef;      /* Blue (Code) */
+            --font-main: 'Segoe UI', system-ui, sans-serif;
+            --font-code: 'Fira Code', 'Consolas', monospace;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: var(--font-main);
+            background-color: var(--bg);
             color: var(--text);
-            background-color: var(--light);
-            line-height: 1.6;
+            font-family: var(--font-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
-        /* --- TYPOGRAPHY --- */
-        h1, h2, h3 { color: var(--dark); font-weight: 800; line-height: 1.2; }
-        h1 { font-size: 3rem; margin-bottom: 1rem; letter-spacing: -1px; }
-        h2 { font-size: 2.2rem; margin-bottom: 2rem; text-align: center; }
-        h3 { font-size: 1.4rem; margin-bottom: 0.5rem; }
-        p { margin-bottom: 1rem; font-size: 1.1rem; }
-        
-        .highlight { color: var(--primary); font-weight: 700; }
-        .mono { font-family: var(--font-mono); color: var(--primary-dark); background: #e0e7ff; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+        /* --- HEADER --- */
+        header {
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+        .subtitle { font-size: 0.9rem; color: #94a3b8; }
 
         /* --- LAYOUT --- */
-        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
-        section { padding: 5rem 0; border-bottom: 1px solid #e2e8f0; }
-
-        /* --- COMPONENT: HERO --- */
-        .hero {
-            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
-            color: var(--white);
-            padding: 8rem 0;
-            text-align: center;
-        }
-        .hero h1 { color: var(--white); }
-        .hero p { color: #94a3b8; font-size: 1.3rem; max-width: 700px; margin: 0 auto; }
-
-        /* --- COMPONENT: PIPELINE (THE FLOW) --- */
-        .pipeline-container {
+        .main-container {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-            margin: 3rem 0;
+            flex: 1;
+            height: calc(100vh - 70px);
+            overflow: hidden;
         }
 
-        .pipe-step {
-            background: var(--white);
-            padding: 1.5rem;
-            border-radius: var(--radius);
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            text-align: center;
+        /* --- SIDEBAR NAV --- */
+        .sidebar {
+            width: 250px;
+            background: #020617;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-item {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            color: #94a3b8;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover { background: var(--panel); color: var(--text); }
+        .nav-item.active {
+            background: var(--panel);
+            border-left-color: var(--accent);
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        /* --- LAB CONTENT AREA --- */
+        .lab-area {
             flex: 1;
-            min-width: 180px;
-            border-top: 5px solid var(--primary);
+            padding: 2rem;
+            overflow-y: auto;
+            display: none; /* Hidden by default */
+        }
+
+        .lab-area.active { display: block; }
+
+        h2 { font-size: 2rem; margin-bottom: 0.5rem; }
+        .lab-intro { color: #94a3b8; margin-bottom: 2rem; max-width: 800px; }
+
+        /* --- WORKBENCH (SPLIT SCREEN) --- */
+        .workbench {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            height: 600px;
+        }
+
+        /* LEFT: CODE EDITOR SIMULATION */
+        .code-panel {
+            background: #111;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: var(--font-code);
+            font-size: 0.9rem;
+            overflow: auto;
             position: relative;
         }
-
-        .pipe-step::after {
-            content: "➜";
+        
+        .code-header {
             position: absolute;
-            right: -20px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.5rem;
-            color: var(--text);
-            opacity: 0.5;
+            top: 0; left: 0; right: 0;
+            background: #222;
+            padding: 5px 15px;
+            font-size: 0.8rem;
+            color: #777;
+            border-bottom: 1px solid #333;
         }
 
-        .pipe-step:last-child::after { content: none; }
+        .line-num { color: #444; margin-right: 10px; select-user: none; }
+        
+        /* Syntax Highlighting */
+        .c-k { color: var(--keyword); }
+        .c-s { color: var(--string); }
+        .c-c { color: var(--comment); }
+        .c-f { color: var(--func); }
 
-        @media (max-width: 768px) {
-            .pipe-step::after { content: "⬇"; right: 50%; top: auto; bottom: -30px; transform: translateX(50%); }
-            .pipeline-container { flex-direction: column; gap: 2rem; }
-        }
-
-        /* --- COMPONENT: CONCEPT CARDS (DEEP DIVE) --- */
-        .concept-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .concept-card {
-            background: var(--white);
-            border-radius: var(--radius);
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-            border: 1px solid #e2e8f0;
-        }
-
-        .concept-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-
-        .concept-header {
-            background: var(--primary);
-            color: var(--white);
-            padding: 1rem 1.5rem;
-            font-weight: 700;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .concept-body { padding: 1.5rem; }
-
-        .visual-example {
-            background: #f1f5f9;
-            padding: 1rem;
+        /* RIGHT: INTERACTIVE OUTPUT */
+        .output-panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
             border-radius: 8px;
-            margin-top: 1rem;
-            font-family: var(--font-mono);
-            font-size: 0.9rem;
-            border-left: 4px solid var(--accent);
-        }
-
-        /* --- COMPONENT: INTERACTIVE PLAYGROUND --- */
-        .playground {
-            background: var(--dark);
-            color: var(--white);
-            padding: 2rem;
-            border-radius: var(--radius);
-            margin-top: 2rem;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
         }
 
         .input-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; color: var(--accent); }
         
-        input[type="text"] {
+        textarea {
             width: 100%;
+            background: #0f172a;
+            border: 1px solid var(--border);
+            color: var(--text);
             padding: 1rem;
-            border-radius: 8px;
-            border: none;
-            font-family: var(--font-mono);
-            font-size: 1.1rem;
+            border-radius: 6px;
+            font-family: var(--font-main);
+            resize: none;
+            height: 80px;
         }
 
-        .btn-action {
-            background: var(--secondary);
-            color: var(--darker);
+        .btn-run {
+            background: var(--accent);
+            color: #000;
             border: none;
             padding: 0.8rem 1.5rem;
             border-radius: 6px;
             font-weight: 700;
             cursor: pointer;
-            font-size: 1rem;
+            align-self: flex-start;
             transition: opacity 0.2s;
         }
-        
-        .btn-action:hover { opacity: 0.9; }
+        .btn-run:hover { opacity: 0.9; }
 
-        .output-area {
-            background: var(--code-bg);
+        .result-box {
+            background: #000;
+            border: 1px solid var(--success);
+            color: var(--success);
             padding: 1rem;
-            border-radius: 8px;
-            min-height: 60px;
-            font-family: var(--font-mono);
-            color: #a5f3fc; /* Cyan text */
+            border-radius: 6px;
+            font-family: var(--font-code);
             margin-top: 1rem;
+            flex: 1;
+            overflow: auto;
+            white-space: pre-wrap;
         }
 
-        /* --- COMPONENT: MATH EXPLAINER --- */
-        .math-box {
-            background: #fffbeb; /* Amber light */
-            border: 2px solid #fcd34d;
-            padding: 2rem;
-            border-radius: var(--radius);
-            margin: 2rem 0;
-        }
-
-        .vector-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
+        /* --- RESPONSIVE --- */
+        @media (max-width: 900px) {
+            .workbench { grid-template-columns: 1fr; height: auto; }
+            .sidebar { width: 70px; }
+            .nav-text { display: none; }
+            .nav-item { text-align: center; padding: 1.5rem 0; }
         }
     </style>
 </head>
 <body>
 
-    <header class="hero">
-        <div class="container">
-            <h1>NLP: Under the Hood 🔧</h1>
-            <p>Don't just use the libraries. Understand the machinery. <br>The "Deep Concepts" every beginner skips but needs to know.</p>
+    <header>
+        <div>
+            <h1>NLP Builder Workshop 🛠️</h1>
+            <span class="subtitle">Don't just import it. Build it.</span>
+        </div>
+        <div>
+            <span style="background: var(--success); color: #000; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">LIVE MODE</span>
         </div>
     </header>
 
-    <section>
-        <div class="container">
-            <h2>1. The NLP Pipeline ⚙️</h2>
-            <p style="text-align: center;">Before AI can "think," text must go through a factory line. This is the <strong>Standard Preprocessing Pipeline</strong>.</p>
-            
-            <div class="pipeline-container">
-                <div class="pipe-step">
-                    <h3>1. Cleaning</h3>
-                    <p>Remove HTML tags, emojis, and noise.</p>
+    <div class="main-container">
+        <nav class="sidebar">
+            <div class="nav-item active" onclick="switchLab('lab1', this)">
+                <span class="nav-icon">1.</span> <span class="nav-text">Tokenizer</span>
+            </div>
+            <div class="nav-item" onclick="switchLab('lab2', this)">
+                <span class="nav-icon">2.</span> <span class="nav-text">Normalizer</span>
+            </div>
+            <div class="nav-item" onclick="switchLab('lab3', this)">
+                <span class="nav-icon">3.</span> <span class="nav-text">Bag of Words</span>
+            </div>
+            <div class="nav-item" onclick="switchLab('lab4', this)">
+                <span class="nav-icon">4.</span> <span class="nav-text">Sentiment</span>
+            </div>
+        </nav>
+
+        <div id="lab1" class="lab-area active">
+            <h2>Lab 1: The Tokenizer</h2>
+            <p class="lab-intro">Computers don't see words; they see a long string of characters. Your first job is to build a tool that "cuts" the string into a list of words.</p>
+
+            <div class="workbench">
+                <div class="code-panel">
+                    <div class="code-header">build_tokenizer.py</div>
+                    <br>
+                    <span class="c-c"># The Goal: Split text by spaces</span><br>
+                    <span class="c-k">def</span> <span class="c-f">simple_tokenize</span>(text):<br>
+                    <span class="line-num">1</span> &nbsp;&nbsp;tokens = []<br>
+                    <span class="line-num">2</span> &nbsp;&nbsp;current_word = <span class="c-s">""</span><br>
+                    <span class="line-num">3</span> <br>
+                    <span class="line-num">4</span> &nbsp;&nbsp;<span class="c-k">for</span> char <span class="c-k">in</span> text:<br>
+                    <span class="line-num">5</span> &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-k">if</span> char == <span class="c-s">" "</span>:<br>
+                    <span class="line-num">6</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-c"># We found a space! Save word.</span><br>
+                    <span class="line-num">7</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tokens.append(current_word)<br>
+                    <span class="line-num">8</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;current_word = <span class="c-s">""</span><br>
+                    <span class="line-num">9</span> &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-k">else</span>:<br>
+                    <span class="line-num">10</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-c"># Build the word letter by letter</span><br>
+                    <span class="line-num">11</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;current_word += char<br>
+                    <span class="line-num">12</span><br>
+                    <span class="line-num">13</span>&nbsp;&nbsp;<span class="c-c"># Add the last word</span><br>
+                    <span class="line-num">14</span>&nbsp;&nbsp;tokens.append(current_word)<br>
+                    <span class="line-num">15</span>&nbsp;&nbsp;<span class="c-k">return</span> tokens
                 </div>
-                <div class="pipe-step">
-                    <h3>2. Tokenization</h3>
-                    <p>Chop text into individual pieces (words).</p>
-                </div>
-                <div class="pipe-step">
-                    <h3>3. Normalization</h3>
-                    <p>Lowercasing, Stemming, Removing Stop Words.</p>
-                </div>
-                <div class="pipe-step">
-                    <h3>4. Vectorization</h3>
-                    <p>Turn words into numbers (Math).</p>
-                </div>
-                <div class="pipe-step">
-                    <h3>5. Model</h3>
-                    <p>Feed numbers into AI.</p>
+
+                <div class="output-panel">
+                    <div class="input-group">
+                        <label>TEST INPUT:</label>
+                        <textarea id="input1">Hello world this is my code</textarea>
+                    </div>
+                    <button class="btn-run" onclick="runLab1()">Run Tokenizer</button>
+                    <div class="result-box" id="result1">// Output will appear here...</div>
                 </div>
             </div>
         </div>
-    </section>
 
-    <section style="background-color: var(--white);">
-        <div class="container">
-            <h2>2. Core Concepts Explained 🧠</h2>
-            <div class="concept-grid">
-                
-                <div class="concept-card">
-                    <div class="concept-header">
-                        Concept #1: Tokenization
-                        <span>✂️</span>
-                    </div>
-                    <div class="concept-body">
-                        <p><strong>Definition:</strong> Breaking a sentence into smaller units called "tokens".</p>
-                        <p>Computers can't digest a whole paragraph. They eat one word at a time.</p>
-                        <div class="visual-example">
-                            Input: "I love AI!"<br>
-                            Tokens: ["I", "love", "AI", "!"]
-                        </div>
-                    </div>
+        <div id="lab2" class="lab-area">
+            <h2>Lab 2: The Normalizer (Stop Words)</h2>
+            <p class="lab-intro">Data is noisy. Words like "is", "the", and "at" are useless for AI logic. Build a filter to remove them.</p>
+
+            <div class="workbench">
+                <div class="code-panel">
+                    <div class="code-header">remove_stopwords.py</div>
+                    <br>
+                    <span class="c-c"># The "Trash" list</span><br>
+                    stop_words = [<span class="c-s">"is"</span>, <span class="c-s">"the"</span>, <span class="c-s">"at"</span>, <span class="c-s">"a"</span>]<br>
+                    <br>
+                    <span class="c-k">def</span> <span class="c-f">clean_text</span>(token_list):<br>
+                    <span class="line-num">1</span> &nbsp;&nbsp;clean_list = []<br>
+                    <span class="line-num">2</span> <br>
+                    <span class="line-num">3</span> &nbsp;&nbsp;<span class="c-k">for</span> word <span class="c-k">in</span> token_list:<br>
+                    <span class="line-num">4</span> &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-c"># Convert to lowercase first!</span><br>
+                    <span class="line-num">5</span> &nbsp;&nbsp;&nbsp;&nbsp;word = word.lower()<br>
+                    <span class="line-num">6</span> <br>
+                    <span class="line-num">7</span> &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-c"># Check if word is in trash list</span><br>
+                    <span class="line-num">8</span> &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-k">if</span> word <span class="c-k">not in</span> stop_words:<br>
+                    <span class="line-num">9</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;clean_list.append(word)<br>
+                    <span class="line-num">10</span><br>
+                    <span class="line-num">11</span>&nbsp;&nbsp;<span class="c-k">return</span> clean_list
                 </div>
 
-                <div class="concept-card">
-                    <div class="concept-header">
-                        Concept #2: Stop Words
-                        <span>🗑️</span>
+                <div class="output-panel">
+                    <div class="input-group">
+                        <label>TEST INPUT (Space separated):</label>
+                        <textarea id="input2">The quick brown fox is at a park</textarea>
                     </div>
-                    <div class="concept-body">
-                        <p><strong>Definition:</strong> Words that are grammatically necessary but carry no meaning.</p>
-                        <p>Words like <em>"is", "the", "and", "a"</em> are noise. We remove them to focus on the keywords.</p>
-                        <div class="visual-example">
-                            Input: "The dog is running"<br>
-                            Cleaned: "dog", "running"
-                        </div>
-                    </div>
-                </div>
-
-                <div class="concept-card">
-                    <div class="concept-header">
-                        Concept #3: Stemming vs Lemma
-                        <span>🌱</span>
-                    </div>
-                    <div class="concept-body">
-                        <p><strong>The Goal:</strong> Reducing a word to its base form so "Run", "Running", and "Ran" count as the same thing.</p>
-                        
-                        <p><strong>Stemming (Fast & Dumb):</strong> Just chops off the end.</p>
-                        <div class="visual-example">"Happily" -> "Happi" (Not a real word)</div>
-                        
-                        <p style="margin-top: 10px;"><strong>Lemmatization (Slow & Smart):</strong> Uses a dictionary to find the root.</p>
-                        <div class="visual-example">"Better" -> "Good" (Understands meaning)</div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-    <section style="background-color: var(--darker); color: var(--white);">
-        <div class="container">
-            <h2>3. Interactive Lab: Try It Yourself 🧪</h2>
-            <p style="text-align: center; color: #cbd5e1;">See how a computer actually splits your text.</p>
-
-            <div class="playground">
-                <div class="input-group">
-                    <label style="display:block; margin-bottom: 0.5rem;">Enter a sentence:</label>
-                    <input type="text" id="userInput" value="Thinking deeply about AI is fun, isn't it?" placeholder="Type something here...">
-                </div>
-                
-                <button class="btn-action" onclick="processText()">Run Preprocessing</button>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem;">
-                    <div>
-                        <h4>1. Tokens (Split)</h4>
-                        <div id="outputTokens" class="output-area">Waiting...</div>
-                    </div>
-                    <div>
-                        <h4>2. Lowercase (Normalize)</h4>
-                        <div id="outputLower" class="output-area">Waiting...</div>
-                    </div>
-                    <div>
-                        <h4>3. Stop Words Removed (Filter)</h4>
-                        <div id="outputStop" class="output-area">Waiting...</div>
-                    </div>
+                    <button class="btn-run" onclick="runLab2()">Run Cleaner</button>
+                    <div class="result-box" id="result2">// Output will appear here...</div>
                 </div>
             </div>
         </div>
-    </section>
 
-    <section>
-        <div class="container">
-            <h2>4. How Text Becomes Math (Vectorization) 🔢</h2>
-            <p>Computers cannot understand words. They only understand numbers. This is how we translate.</p>
+        <div id="lab3" class="lab-area">
+            <h2>Lab 3: Frequency Counter (BoW)</h2>
+            <p class="lab-intro">How do we turn text into math? By counting. This creates a "vector" (a list of numbers) representing the text.</p>
 
-            <div class="math-box">
-                <div class="vector-grid">
-                    <div>
-                        <h3>Technique A: Bag of Words (BoW)</h3>
-                        <p>Imagine a giant list of every English word. We just count how many times each word appears.</p>
-                        <br>
-                        <div class="visual-example" style="background: white;">
-                            Sentence: "AI is cool. AI is fast."<br><br>
-                            <strong>Vector:</strong><br>
-                            AI: 2<br>
-                            is: 2<br>
-                            cool: 1<br>
-                            fast: 1<br>
-                            burger: 0
-                        </div>
-                        <p style="margin-top:1rem; font-size: 0.9rem; color: #666;"><strong>Problem:</strong> It ignores order. "Dog bites Man" and "Man bites Dog" look the same.</p>
+            <div class="workbench">
+                <div class="code-panel">
+                    <div class="code-header">bag_of_words.py</div>
+                    <br>
+                    <span class="c-k">def</span> <span class="c-f">count_frequencies</span>(words):<br>
+                    <span class="line-num">1</span> &nbsp;&nbsp;<span class="c-c"># A dictionary (Hash Map)</span><br>
+                    <span class="line-num">2</span> &nbsp;&nbsp;bag = {}<br>
+                    <span class="line-num">3</span> <br>
+                    <span class="line-num">4</span> &nbsp;&nbsp;<span class="c-k">for</span> word <span class="c-k">in</span> words:<br>
+                    <span class="line-num">5</span> &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-k">if</span> word <span class="c-k">in</span> bag:<br>
+                    <span class="line-num">6</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-c"># Increment count</span><br>
+                    <span class="line-num">7</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bag[word] += 1<br>
+                    <span class="line-num">8</span> &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-k">else</span>:<br>
+                    <span class="line-num">9</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="c-c"># First time seeing word</span><br>
+                    <span class="line-num">10</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bag[word] = 1<br>
+                    <span class="line-num">11</span><br>
+                    <span class="line-num">12</span>&nbsp;&nbsp;<span class="c-k">return</span> bag
+                </div>
+
+                <div class="output-panel">
+                    <div class="input-group">
+                        <label>TEST INPUT:</label>
+                        <textarea id="input3">AI is great AI is fun AI is future</textarea>
                     </div>
-
-                    <div style="border-left: 1px solid #e2e8f0; padding-left: 2rem;">
-                        <h3>Technique B: Word Embeddings (Advanced)</h3>
-                        <p>This gives every word a specific coordinate in space.</p>
-                        <p>Words with similar meanings are mathematically close to each other.</p>
-                        <br>
-                        <div class="visual-example" style="background: white;">
-                            <strong>King</strong> - <strong>Man</strong> + <strong>Woman</strong> = <strong>Queen</strong>
-                        </div>
-                        <p style="margin-top:1rem; font-size: 0.9rem; color: #666;">This allows the computer to understand analogies!</p>
-                    </div>
+                    <button class="btn-run" onclick="runLab3()">Count Words</button>
+                    <div class="result-box" id="result3">// Output will appear here...</div>
                 </div>
             </div>
         </div>
-    </section>
 
-    <section style="text-align: center;">
-        <div class="container">
-            <h2>Ready to code this?</h2>
-            <p>Now that you know the theory, you are ready to use the libraries.</p>
-            <p>The libraries (NLTK, spaCy) just automate these steps for you.</p>
+        <div id="lab4" class="lab-area">
+            <h2>Lab 4: Sentiment Analyzer</h2>
+            <p class="lab-intro">Before Deep Learning, we used "Lexicons" (Rule-based dictionaries). If a word is good, +1 score. If bad, -1 score.</p>
+
+            <div class="workbench">
+                <div class="code-panel">
+                    <div class="code-header">sentiment.py</div>
+                    <br>
+                    <span class="c-c"># The "Lexicon"</span><br>
+                    scores = {<span class="c-s">"good"</span>: 1, <span class="c-s">"love"</span>: 1, <span class="c-s">"bad"</span>: -1, <span class="c-s">"hate"</span>: -1}<br>
+                    <br>
+                    <span class="c-k">def</span> <span class="c-f">get_sentiment</span>(text):<br>
+                    <span class="line-num">1</span> &nbsp;&nbsp;score = 0<br>
+                    <span class="line-num">2</span> &nbsp;&nbsp;words = text.split()<br>
+                    <span class="line-num">3</span> <br>
+                    <span class="line-num">4</span> &nbsp;&nbsp;<span class="c-k">for</span> word <span class="c-k">in</span> words:<br>
+                    <span class="line-num">5</span> &nbsp;&nbsp;&nbsp;&nbsp;<span class="c-k">if</span> word <span class="c-k">in</span> scores:<br>
+                    <span class="line-num">6</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;score += scores[word]<br>
+                    <span class="line-num">7</span> <br>
+                    <span class="line-num">8</span> &nbsp;&nbsp;<span class="c-k">if</span> score > 0: <span class="c-k">return</span> <span class="c-s">"POSITIVE"</span><br>
+                    <span class="line-num">9</span> &nbsp;&nbsp;<span class="c-k">if</span> score < 0: <span class="c-k">return</span> <span class="c-s">"NEGATIVE"</span><br>
+                    <span class="line-num">10</span>&nbsp;&nbsp;<span class="c-k">return</span> <span class="c-s">"NEUTRAL"</span>
+                </div>
+
+                <div class="output-panel">
+                    <div class="input-group">
+                        <label>TEST INPUT:</label>
+                        <textarea id="input4">I love this product but I hate the price</textarea>
+                    </div>
+                    <button class="btn-run" onclick="runLab4()">Analyze Sentiment</button>
+                    <div class="result-box" id="result4">// Output will appear here...</div>
+                </div>
+            </div>
         </div>
-    </section>
+
+    </div>
 
     <script>
-        // A simple "Stop Word" list for the demo
-        const stopWords = ["is", "it", "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "about"];
-
-        function processText() {
-            // 1. Get Input
-            const rawText = document.getElementById('userInput').value;
+        // --- NAVIGATION LOGIC ---
+        function switchLab(labId, navElement) {
+            // Hide all labs
+            document.querySelectorAll('.lab-area').forEach(lab => lab.classList.remove('active'));
+            // Show selected lab
+            document.getElementById(labId).classList.add('active');
             
-            // 2. Tokenization (Regex to split by space or punctuation)
-            // This is a simplified regex for educational purposes
-            const tokens = rawText.match(/\b\w+\b|[^\w\s]/g) || [];
+            // Update sidebar UI
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            navElement.classList.add('active');
+        }
+
+        // --- LAB 1: TOKENIZER LOGIC ---
+        function runLab1() {
+            const text = document.getElementById('input1').value;
+            let tokens = [];
+            let currentWord = "";
             
-            // Display Tokens
-            document.getElementById('outputTokens').innerText = `[${tokens.map(t => `"${t}"`).join(', ')}]`;
+            // Simple loop simulation
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                if (char === " ") {
+                    if(currentWord) tokens.push(currentWord);
+                    currentWord = "";
+                } else {
+                    currentWord += char;
+                }
+            }
+            if(currentWord) tokens.push(currentWord);
 
-            // 3. Lowercase
-            const lowerTokens = tokens.map(t => t.toLowerCase());
-            document.getElementById('outputLower').innerText = `[${lowerTokens.map(t => `"${t}"`).join(', ')}]`;
+            document.getElementById('result1').innerText = 
+                `Result List:\n[\n  "${tokens.join('",\n  "')}"\n]`;
+        }
 
-            // 4. Remove Stop Words
-            const cleanTokens = lowerTokens.filter(t => !stopWords.includes(t));
-            document.getElementById('outputStop').innerText = `[${cleanTokens.map(t => `"${t}"`).join(', ')}]`;
+        // --- LAB 2: STOP WORDS LOGIC ---
+        function runLab2() {
+            const rawText = document.getElementById('input2').value;
+            const tokens = rawText.split(" "); // Using JS split for simplicity here
+            const stopWords = ["is", "the", "at", "a", "an", "of"];
+            
+            const cleanList = tokens.filter(word => !stopWords.includes(word.toLowerCase()));
+            const removed = tokens.filter(word => stopWords.includes(word.toLowerCase()));
+
+            document.getElementById('result2').innerText = 
+                `Kept Words: ${JSON.stringify(cleanList)}\n\nRemoved Words: ${JSON.stringify(removed)}`;
+        }
+
+        // --- LAB 3: BAG OF WORDS LOGIC ---
+        function runLab3() {
+            const text = document.getElementById('input3').value;
+            // Clean punctuation for better counting
+            const words = text.replace(/[.,]/g, '').split(" ");
+            const bag = {};
+
+            words.forEach(word => {
+                // simple normalization
+                const w = word.trim();
+                if(w) {
+                    bag[w] = (bag[w] || 0) + 1;
+                }
+            });
+
+            // Formatting output for display
+            let output = "{\n";
+            for (const [key, value] of Object.entries(bag)) {
+                output += `  "${key}": ${value},\n`;
+            }
+            output += "}";
+
+            document.getElementById('result3').innerText = output;
+        }
+
+        // --- LAB 4: SENTIMENT LOGIC ---
+        function runLab4() {
+            const text = document.getElementById('input4').value;
+            const words = text.toLowerCase().replace(/[.,]/g, '').split(" ");
+            
+            const scores = {"good": 1, "love": 1, "excellent": 1, "best": 1, "bad": -1, "hate": -1, "worst": -1, "awful": -1};
+            let totalScore = 0;
+            let log = "Calculation Log:\n";
+
+            words.forEach(word => {
+                if(scores[word]) {
+                    totalScore += scores[word];
+                    log += `Found "${word}": ${scores[word] > 0 ? '+' : ''}${scores[word]}\n`;
+                }
+            });
+
+            let finalVerdict = "NEUTRAL";
+            if (totalScore > 0) finalVerdict = "POSITIVE 😊";
+            if (totalScore < 0) finalVerdict = "NEGATIVE 😠";
+
+            document.getElementById('result4').innerText = 
+                `${log}\n----------------\nTotal Score: ${totalScore}\nVerdict: ${finalVerdict}`;
         }
     </script>
+
 </body>
 </html>
